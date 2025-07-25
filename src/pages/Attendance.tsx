@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Calendar } from '../components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import AttendancePunchingLog from '../components/AttendancePunchingLog';
 import { 
   Clock, 
   CheckCircle, 
@@ -350,6 +351,9 @@ const Attendance = () => {
           </Card>
         </div>
       </div>
+
+      {/* Team Punching Log */}
+      <AttendancePunchingLog />
     </div>
   );
 };

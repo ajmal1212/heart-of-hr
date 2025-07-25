@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -6,6 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Calendar } from '../components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { 
   Clock, 
   CheckCircle, 
@@ -16,7 +16,9 @@ import {
   Calendar as CalendarIcon,
   TrendingUp,
   Users,
-  Timer
+  Timer,
+  MapPin,
+  Smartphone
 } from 'lucide-react';
 
 const Attendance = () => {
@@ -62,6 +64,52 @@ const Attendance = () => {
       department: 'Sales'
     }
   ];
+
+  // Generate current month punching logs for logged in employee
+  const generatePunchingLogs = () => {
+    const logs = [];
+    const currentDate = new Date();
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    
+    for (let day = 1; day <= currentDate.getDate(); day++) {
+      const logDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+      const dayOfWeek = logDate.getDay();
+      
+      // Skip weekends for regular work days
+      if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+      
+      const dateStr = logDate.toISOString().split('T')[0];
+      const dayName = logDate.toLocaleDateString('en-US', { weekday: 'short' });
+      
+      // Generate realistic punching data
+      const baseCheckIn = new Date(logDate);
+      baseCheckIn.setHours(9, 0, 0, 0);
+      
+      const checkInVariation = Math.random() * 30 - 15; // -15 to +15 minutes
+      const checkInTime = new Date(baseCheckIn.getTime() + checkInVariation * 60000);
+      
+      const checkOutTime = new Date(checkInTime);
+      checkOutTime.setHours(checkOutTime.getHours() + 8, checkOutTime.getMinutes() + 30); // 8.5 hours later
+      
+      const workHours = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60);
+      
+      logs.push({
+        id: day,
+        date: dateStr,
+        day: dayName,
+        checkIn: checkInTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        checkOut: day === currentDate.getDate() ? '-' : checkOutTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        workHours: day === currentDate.getDate() ? 'In Progress' : `${workHours.toFixed(1)}h`,
+        status: checkInVariation > 10 ? 'late' : 'present',
+        location: 'Office',
+        device: Math.random() > 0.5 ? 'Mobile App' : 'Web Portal'
+      });
+    }
+    
+    return logs.reverse(); // Most recent first
+  };
+
+  const punchingLogs = generatePunchingLogs();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -120,71 +168,111 @@ const Attendance = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Attendance List */}
+        {/* My Punching Logs */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Today's Attendance</CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <CalendarIcon className="w-4 h-4 mr-2" />
-                    Select Date
-                  </Button>
-                </div>
+                <CardTitle>My Punching Logs - {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</CardTitle>
+                <Badge variant="outline">
+                  {punchingLogs.length} working days
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="present">Present</TabsTrigger>
-                  <TabsTrigger value="late">Late</TabsTrigger>
-                  <TabsTrigger value="absent">Absent</TabsTrigger>
+              <Tabs defaultValue="logs" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="logs">Punching Logs</TabsTrigger>
+                  <TabsTrigger value="summary">Monthly Summary</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="all" className="space-y-4 mt-4">
-                  {todayAttendance.map((record) => (
-                    <Card key={record.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="w-12 h-12">
-                              <AvatarImage src={record.avatar} alt={record.employee} />
-                              <AvatarFallback>{record.employee.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-semibold text-gray-900">{record.employee}</h3>
-                              <p className="text-sm text-gray-500">{record.department}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge className={getStatusColor(record.status)}>
-                                {getStatusIcon(record.status)}
-                                <span className="ml-1">{record.status}</span>
+                <TabsContent value="logs" className="mt-4">
+                  <div className="max-h-96 overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Day</TableHead>
+                          <TableHead>Check In</TableHead>
+                          <TableHead>Check Out</TableHead>
+                          <TableHead>Hours</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>Device</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {punchingLogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell className="font-medium">
+                              {new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </TableCell>
+                            <TableCell>{log.day}</TableCell>
+                            <TableCell className="text-green-600 font-medium">{log.checkIn}</TableCell>
+                            <TableCell className="text-red-600 font-medium">{log.checkOut}</TableCell>
+                            <TableCell>{log.workHours}</TableCell>
+                            <TableCell>
+                              <Badge className={getStatusColor(log.status)}>
+                                {getStatusIcon(log.status)}
+                                <span className="ml-1">{log.status}</span>
                               </Badge>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 text-sm">
-                              <div>
-                                <p className="text-gray-500">Check In</p>
-                                <p className="font-medium">{record.checkIn}</p>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {log.location}
                               </div>
-                              <div>
-                                <p className="text-gray-500">Check Out</p>
-                                <p className="font-medium">{record.checkOut}</p>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Smartphone className="w-3 h-3" />
+                                {log.device}
                               </div>
-                              <div>
-                                <p className="text-gray-500">Hours</p>
-                                <p className="font-medium">{record.workHours}</p>
-                              </div>
-                            </div>
-                          </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="summary" className="mt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">{punchingLogs.filter(l => l.status === 'present').length}</div>
+                          <div className="text-sm text-gray-500">Present Days</div>
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-yellow-600">{punchingLogs.filter(l => l.status === 'late').length}</div>
+                          <div className="text-sm text-gray-500">Late Days</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {Math.round(punchingLogs.filter(l => l.workHours !== 'In Progress').reduce((acc, l) => acc + parseFloat(l.workHours), 0))}h
+                          </div>
+                          <div className="text-sm text-gray-500">Total Hours</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">8.5h</div>
+                          <div className="text-sm text-gray-500">Avg. Daily Hours</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>

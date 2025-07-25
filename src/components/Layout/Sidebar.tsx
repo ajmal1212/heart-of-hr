@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -15,7 +14,8 @@ import {
   Shield,
   FileText,
   Bell,
-  Award
+  Award,
+  Network
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
@@ -28,6 +28,7 @@ const Sidebar = () => {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/', roles: ['admin', 'hr', 'manager', 'employee'] },
     { icon: Users, label: 'Employees', path: '/employees', roles: ['admin', 'hr', 'manager'] },
+    { icon: Network, label: 'Organization', path: '/organization-hierarchy', roles: ['admin', 'hr', 'manager'] },
     { icon: Calendar, label: 'Leave Management', path: '/leaves', roles: ['admin', 'hr', 'manager', 'employee'] },
     { icon: Clock, label: 'Attendance', path: '/attendance', roles: ['admin', 'hr', 'manager', 'employee'] },
     { icon: DollarSign, label: 'Payroll', path: '/payroll', roles: ['admin', 'hr'] },

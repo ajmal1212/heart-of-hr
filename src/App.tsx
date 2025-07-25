@@ -9,6 +9,7 @@ import Layout from './components/Layout/Layout';
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
+import OrganizationHierarchy from "./pages/OrganizationHierarchy";
 import Leaves from "./pages/Leaves";
 import Attendance from "./pages/Attendance";
 import Payroll from "./pages/Payroll";
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/employees" element={<Employees />} />
+              <Route path="/organization-hierarchy" element={<OrganizationHierarchy />} />
               <Route path="/leaves" element={<Leaves />} />
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/payroll" element={<Payroll />} />

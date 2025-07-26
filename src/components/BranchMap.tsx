@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -9,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useForm } from 'react-hook-form';
 import { Plus, MapPin, Users, Building2, Briefcase } from 'lucide-react';
+import InteractiveIndiaMap from './InteractiveIndiaMap';
 
 interface Branch {
   id: string;
@@ -16,7 +16,7 @@ interface Branch {
   city: string;
   state: string;
   address: string;
-  coordinates: { x: number; y: number };
+  coordinates: { lat: number; lng: number }; // Updated interface
   employees: number;
   departments: string[];
   roles: string[];
@@ -30,7 +30,7 @@ const BranchMap = () => {
       city: 'New Delhi',
       state: 'Delhi',
       address: 'Connaught Place, New Delhi',
-      coordinates: { x: 280, y: 120 },
+      coordinates: { lat: 28.6139, lng: 77.2090 }, // Updated to lat/lng format
       employees: 150,
       departments: ['HR', 'Finance', 'IT', 'Marketing'],
       roles: ['CEO', 'VP', 'Manager', 'Executive']
@@ -41,7 +41,7 @@ const BranchMap = () => {
       city: 'Mumbai',
       state: 'Maharashtra',
       address: 'Bandra Kurla Complex, Mumbai',
-      coordinates: { x: 220, y: 280 },
+      coordinates: { lat: 19.0760, lng: 72.8777 }, // Updated to lat/lng format
       employees: 80,
       departments: ['Sales', 'Marketing', 'Operations'],
       roles: ['Regional Head', 'Manager', 'Executive', 'Associate']
@@ -52,7 +52,7 @@ const BranchMap = () => {
       city: 'Bangalore',
       state: 'Karnataka',
       address: 'Electronic City, Bangalore',
-      coordinates: { x: 260, y: 350 },
+      coordinates: { lat: 12.9716, lng: 77.5946 }, // Updated to lat/lng format
       employees: 120,
       departments: ['Engineering', 'Product', 'QA'],
       roles: ['Tech Lead', 'Senior Developer', 'Developer', 'Intern']
@@ -89,7 +89,7 @@ const BranchMap = () => {
       city: data.city,
       state: data.state,
       address: data.address,
-      coordinates: { x: Math.random() * 300 + 100, y: Math.random() * 200 + 100 },
+      coordinates: { lat: Math.random() * 30 + 10, lng: Math.random() * 30 + 70 },
       employees: 0,
       departments: data.departments || [],
       roles: data.roles || []
@@ -258,112 +258,14 @@ const BranchMap = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* India Map */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              Branch Locations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="relative bg-gradient-to-br from-blue-50 to-green-50 rounded-lg border" style={{ height: '500px' }}>
-              {/* Improved India Map */}
-              <svg 
-                viewBox="0 0 400 300" 
-                className="w-full h-full"
-                preserveAspectRatio="xMidYMid meet"
-              >
-                {/* India outline - more detailed path */}
-                <path
-                  d="M120,80 Q140,60 170,65 Q200,55 230,70 Q260,60 290,80 Q310,100 300,140 Q290,180 270,220 Q250,250 220,260 Q190,270 160,255 Q130,240 115,200 Q100,160 110,120 Q115,100 120,80 Z"
-                  fill="#e0f7fa"
-                  stroke="#0277bd"
-                  strokeWidth="2"
-                  className="drop-shadow-sm"
-                />
-                
-                {/* Kashmir region */}
-                <path
-                  d="M170,65 Q180,50 200,55 Q220,50 230,70"
-                  fill="#e0f7fa"
-                  stroke="#0277bd"
-                  strokeWidth="2"
-                />
-                
-                {/* Northeast states */}
-                <path
-                  d="M290,80 Q320,85 330,100 Q325,115 300,120 Q290,110 290,80"
-                  fill="#e0f7fa"
-                  stroke="#0277bd"
-                  strokeWidth="2"
-                />
-                
-                {/* Western coastline detail */}
-                <path
-                  d="M115,200 Q110,220 120,240 Q130,245 135,230 Q125,215 115,200"
-                  fill="#e0f7fa"
-                  stroke="#0277bd"
-                  strokeWidth="2"
-                />
-                
-                {/* Branch markers */}
-                {branches.map((branch) => (
-                  <g key={branch.id}>
-                    {/* Marker shadow */}
-                    <circle
-                      cx={branch.coordinates.x + 2}
-                      cy={branch.coordinates.y + 2}
-                      r="8"
-                      fill="rgba(0,0,0,0.2)"
-                    />
-                    {/* Main marker */}
-                    <circle
-                      cx={branch.coordinates.x}
-                      cy={branch.coordinates.y}
-                      r="8"
-                      fill="#ef4444"
-                      stroke="white"
-                      strokeWidth="2"
-                      className="cursor-pointer hover:r-10 transition-all animate-pulse"
-                      onClick={() => setSelectedBranch(branch)}
-                    />
-                    {/* City label */}
-                    <text
-                      x={branch.coordinates.x}
-                      y={branch.coordinates.y - 15}
-                      fontSize="12"
-                      textAnchor="middle"
-                      fill="#1f2937"
-                      className="font-semibold pointer-events-none"
-                    >
-                      {branch.city}
-                    </text>
-                    {/* Employee count badge */}
-                    <circle
-                      cx={branch.coordinates.x + 12}
-                      cy={branch.coordinates.y - 8}
-                      r="8"
-                      fill="#3b82f6"
-                      stroke="white"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x={branch.coordinates.x + 12}
-                      y={branch.coordinates.y - 5}
-                      fontSize="10"
-                      textAnchor="middle"
-                      fill="white"
-                      className="font-bold pointer-events-none"
-                    >
-                      {branch.employees}
-                    </text>
-                  </g>
-                ))}
-              </svg>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Interactive India Map */}
+        <div className="lg:col-span-2">
+          <InteractiveIndiaMap
+            branches={branches}
+            selectedBranch={selectedBranch}
+            onBranchSelect={setSelectedBranch}
+          />
+        </div>
 
         {/* Branch Details */}
         <Card>

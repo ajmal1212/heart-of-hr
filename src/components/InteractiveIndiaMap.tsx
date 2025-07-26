@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -56,31 +56,6 @@ const createBranchIcon = (employeeCount: number) => {
     iconAnchor: [16, 32],
     popupAnchor: [0, -32],
   });
-};
-
-// Map control component that properly uses useMap hook
-const MapControls = () => {
-  const map = useMap();
-
-  const handleZoomIn = () => map.zoomIn();
-  const handleZoomOut = () => map.zoomOut();
-  const handleReset = () => {
-    map.setView([20.5937, 78.9629], 5);
-  };
-
-  return (
-    <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-      <Button size="icon" variant="outline" onClick={handleZoomIn} className="bg-white shadow-lg">
-        <ZoomIn className="w-4 h-4" />
-      </Button>
-      <Button size="icon" variant="outline" onClick={handleZoomOut} className="bg-white shadow-lg">
-        <ZoomOut className="w-4 h-4" />
-      </Button>
-      <Button size="icon" variant="outline" onClick={handleReset} className="bg-white shadow-lg">
-        <RotateCcw className="w-4 h-4" />
-      </Button>
-    </div>
-  );
 };
 
 const InteractiveIndiaMap: React.FC<InteractiveIndiaMapProps> = ({
@@ -236,9 +211,20 @@ const InteractiveIndiaMap: React.FC<InteractiveIndiaMapProps> = ({
                 </Popup>
               </Marker>
             ))}
-            
-            <MapControls />
           </MapContainer>
+          
+          {/* External Map Controls */}
+          <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+            <Button size="icon" variant="outline" className="bg-white shadow-lg">
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+            <Button size="icon" variant="outline" className="bg-white shadow-lg">
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <Button size="icon" variant="outline" className="bg-white shadow-lg">
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

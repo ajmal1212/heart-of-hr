@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
@@ -22,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../components/ui/form';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { 
   Search, 
   Plus, 
@@ -33,10 +33,12 @@ import {
   Save,
   RotateCcw,
   Maximize2,
-  Minimize2
+  Minimize2,
+  MapPin
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Employee } from '../types';
+import BranchMap from '../components/BranchMap';
 
 // Employee Node Component
 const EmployeeNode = ({ data }: { data: any }) => {
@@ -359,8 +361,8 @@ const OrganizationHierarchy = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Organization Hierarchy</h1>
-          <p className="text-gray-500 mt-1">Visualize and manage your organization structure</p>
+          <h1 className="text-3xl font-bold text-gray-900">Organization Management</h1>
+          <p className="text-gray-500 mt-1">Manage your organization structure and branch network</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleResetLayout}>
@@ -377,69 +379,89 @@ const OrganizationHierarchy = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
+      {/* Tabs for Hierarchy and Branches */}
+      <Tabs defaultValue="hierarchy" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="hierarchy" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Organization Hierarchy
+          </TabsTrigger>
+          <TabsTrigger value="branches" className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Branch Network
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="hierarchy" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {stats.map((stat, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 rounded-full bg-gray-100 ${stat.color}`}>
+                      <stat.icon className="w-6 h-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Search Bar */}
+          <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                </div>
-                <div className={`p-3 rounded-full bg-gray-100 ${stat.color}`}>
-                  <stat.icon className="w-6 h-6" />
-                </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search employees in hierarchy..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      {/* Search Bar */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search employees in hierarchy..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+          {/* Hierarchy Flow */}
+          <Card className={isFullScreen ? 'fixed inset-0 z-50' : ''}>
+            <CardHeader>
+              <CardTitle>Organization Chart</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className={`bg-gray-50 ${isFullScreen ? 'h-screen' : 'h-[600px]'}`}>
+                <ReactFlow
+                  nodes={nodes}
+                  edges={edges}
+                  onNodesChange={onNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  onConnect={onConnect}
+                  nodeTypes={nodeTypes}
+                  fitView
+                  attributionPosition="bottom-left"
+                  className="bg-gray-50"
+                >
+                  <Background />
+                  <Controls />
+                  <MiniMap 
+                    nodeColor={(node) => '#3b82f6'}
+                    maskColor="rgba(255, 255, 255, 0.8)"
+                    className="bg-white"
+                  />
+                </ReactFlow>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Hierarchy Flow */}
-      <Card className={isFullScreen ? 'fixed inset-0 z-50' : ''}>
-        <CardHeader>
-          <CardTitle>Organization Chart</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className={`bg-gray-50 ${isFullScreen ? 'h-screen' : 'h-[600px]'}`}>
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              nodeTypes={nodeTypes}
-              fitView
-              attributionPosition="bottom-left"
-              className="bg-gray-50"
-            >
-              <Background />
-              <Controls />
-              <MiniMap 
-                nodeColor={(node) => '#3b82f6'}
-                maskColor="rgba(255, 255, 255, 0.8)"
-                className="bg-white"
-              />
-            </ReactFlow>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="branches">
+          <BranchMap />
+        </TabsContent>
+      </Tabs>
 
       {/* Edit Employee Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

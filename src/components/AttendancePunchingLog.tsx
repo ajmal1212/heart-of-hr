@@ -1,17 +1,39 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { 
+  Search, 
+  Filter, 
+  Download, 
+  Clock, 
+  Calendar,
+  User,
+  Building2,
+  ChevronDown,
+  ChevronUp,
+  MoreVertical
+} from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 interface PunchingLogEntry {
   empNo: string;
   employeeName: string;
   department: string;
+  avatar: string;
   dailyPunches: { [day: number]: string[] };
+  totalHours: string;
+  presentDays: number;
+  lateCount: number;
 }
 
 const AttendancePunchingLog = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
   // Generate days of current month
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -19,12 +41,16 @@ const AttendancePunchingLog = () => {
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Sample data for 3 employees reporting to the logged-in user
+  // Enhanced sample data
   const punchingData: PunchingLogEntry[] = [
     {
       empNo: 'SKY1101',
       employeeName: 'AJMAL',
       department: 'DIGITAL MARKETING',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+      totalHours: '168.5h',
+      presentDays: 20,
+      lateCount: 3,
       dailyPunches: {
         1: ['08:54', '13:41', '13:43', '15:53', '15:56', '18:02'],
         2: ['08:50', '13:00', '13:03', '16:13', '16:15', '18:01'],
@@ -52,6 +78,10 @@ const AttendancePunchingLog = () => {
       empNo: 'SKY1171',
       employeeName: 'DIVAKAR S',
       department: 'DIGITAL MARKETING',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+      totalHours: '142.3h',
+      presentDays: 17,
+      lateCount: 5,
       dailyPunches: {
         1: ['08:46', '08:56', '09:09', '12:23', '12:25', '14:18', '15:13', '16:22', '16:28', '18:03'],
         2: ['08:40', '09:02', '09:05', '12:18', '12:22', '13:50', '14:00', '16:20', '16:22', '17:19', '17:23', '17:56', '17:59', '18:01'],
@@ -76,6 +106,10 @@ const AttendancePunchingLog = () => {
       empNo: 'SKY1218',
       employeeName: 'ABENAV .C',
       department: 'DIGITAL MARKETING',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
+      totalHours: '85.0h',
+      presentDays: 10,
+      lateCount: 2,
       dailyPunches: {
         1: ['08:45', '12:30', '13:30', '18:00'],
         2: ['08:50', '12:00', '13:00', '17:45'],
@@ -91,62 +125,248 @@ const AttendancePunchingLog = () => {
     }
   ];
 
-  const formatPunchTime = (punches: string[]) => {
-    return punches.map((punch, index) => (
-      <div key={index} className="text-xs text-gray-700 leading-tight">
-        {punch}
-      </div>
-    ));
+  const toggleRowExpansion = (empNo: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(empNo)) {
+      newExpanded.delete(empNo);
+    } else {
+      newExpanded.add(empNo);
+    }
+    setExpandedRows(newExpanded);
   };
+
+  const formatPunchTime = (punches: string[]) => {
+    const punchPairs = [];
+    for (let i = 0; i < punches.length; i += 2) {
+      const checkIn = punches[i];
+      const checkOut = punches[i + 1];
+      punchPairs.push({ checkIn, checkOut });
+    }
+    return punchPairs;
+  };
+
+  const getDayStatus = (punches: string[]) => {
+    if (!punches || punches.length === 0) return 'absent';
+    const firstPunch = punches[0];
+    const [hour, minute] = firstPunch.split(':').map(Number);
+    if (hour > 9 || (hour === 9 && minute > 15)) return 'late';
+    return 'present';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'present': return 'bg-green-100 text-green-700';
+      case 'late': return 'bg-yellow-100 text-yellow-700';
+      case 'absent': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const filteredData = punchingData.filter(emp => 
+    emp.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.empNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.department.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle>Team Punching Log - {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</CardTitle>
-          <Badge variant="outline">
-            {punchingData.length} employees reporting to you
-          </Badge>
+          <div>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Team Punching Log
+            </CardTitle>
+            <p className="text-gray-600 mt-1">
+              {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} • {filteredData.length} employees reporting to you
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </div>
+        
+        {/* Search and Stats */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="relative w-80">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{punchingData.reduce((acc, emp) => acc + emp.presentDays, 0)}</div>
+              <div className="text-xs text-gray-500">Total Present</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-yellow-600">{punchingData.reduce((acc, emp) => acc + emp.lateCount, 0)}</div>
+              <div className="text-xs text-gray-500">Late Arrivals</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{punchingData.reduce((acc, emp) => acc + parseFloat(emp.totalHours), 0).toFixed(1)}h</div>
+              <div className="text-xs text-gray-500">Total Hours</div>
+            </div>
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16">SNO.</TableHead>
-                <TableHead className="w-24">EmpNo</TableHead>
-                <TableHead className="w-32">Employee Name</TableHead>
-                <TableHead className="w-32">Department</TableHead>
-                {days.map(day => (
-                  <TableHead key={day} className="w-20 text-center">
-                    {day}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {punchingData.map((employee, index) => (
-                <TableRow key={employee.empNo}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell className="font-medium">{employee.empNo}</TableCell>
-                  <TableCell className="font-medium">{employee.employeeName}</TableCell>
-                  <TableCell>{employee.department}</TableCell>
-                  {days.map(day => (
-                    <TableCell key={day} className="text-center p-2">
-                      {employee.dailyPunches[day] ? (
-                        <div className="space-y-1">
-                          {formatPunchTime(employee.dailyPunches[day])}
-                        </div>
-                      ) : (
-                        <div className="text-gray-400 text-xs">-</div>
+      
+      <CardContent className="p-0">
+        <div className="space-y-2">
+          {filteredData.map((employee) => (
+            <div key={employee.empNo} className="border border-gray-200 rounded-lg overflow-hidden">
+              {/* Employee Header */}
+              <div className="bg-gray-50 p-4 flex items-center justify-between hover:bg-gray-100 transition-colors">
+                <div className="flex items-center space-x-4">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={employee.avatar} alt={employee.employeeName} />
+                    <AvatarFallback>{employee.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-semibold text-lg text-gray-900">{employee.employeeName}</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {employee.empNo}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-4 mt-1">
+                      <span className="text-sm text-gray-600 flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        {employee.department}
+                      </span>
+                      <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {employee.presentDays} days present
+                      </span>
+                      <span className="text-sm text-blue-600 font-medium flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {employee.totalHours}
+                      </span>
+                      {employee.lateCount > 0 && (
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 text-xs">
+                          {employee.lateCount} late
+                        </Badge>
                       )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuItem>Export Data</DropdownMenuItem>
+                      <DropdownMenuItem>Send Notification</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleRowExpansion(employee.empNo)}
+                  >
+                    {expandedRows.has(employee.empNo) ? 
+                      <ChevronUp className="w-4 h-4" /> : 
+                      <ChevronDown className="w-4 h-4" />
+                    }
+                  </Button>
+                </div>
+              </div>
+
+              {/* Expanded Punching Data */}
+              {expandedRows.has(employee.empNo) && (
+                <div className="p-4 bg-white">
+                  <div className="grid grid-cols-7 gap-2 mb-4">
+                    {days.slice(0, 21).map(day => {
+                      const punches = employee.dailyPunches[day];
+                      const status = getDayStatus(punches);
+                      const punchPairs = formatPunchTime(punches || []);
+                      
+                      return (
+                        <div key={day} className="border border-gray-200 rounded-lg p-3 min-h-[120px]">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-sm text-gray-700">{day}</span>
+                            <Badge className={cn("text-xs px-2 py-0.5", getStatusColor(status))}>
+                              {status}
+                            </Badge>
+                          </div>
+                          <div className="space-y-2">
+                            {punchPairs.length > 0 ? punchPairs.map((pair, index) => (
+                              <div key={index} className="bg-gray-50 rounded p-2">
+                                <div className="text-xs text-green-600 font-medium">
+                                  IN: {pair.checkIn}
+                                </div>
+                                {pair.checkOut && (
+                                  <div className="text-xs text-red-600 font-medium">
+                                    OUT: {pair.checkOut}
+                                  </div>
+                                )}
+                              </div>
+                            )) : (
+                              <div className="text-xs text-gray-400 text-center py-2">
+                                No punches
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  {days.length > 21 && (
+                    <div className="grid grid-cols-7 gap-2">
+                      {days.slice(21).map(day => {
+                        const punches = employee.dailyPunches[day];
+                        const status = getDayStatus(punches);
+                        const punchPairs = formatPunchTime(punches || []);
+                        
+                        return (
+                          <div key={day} className="border border-gray-200 rounded-lg p-3 min-h-[120px]">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-semibold text-sm text-gray-700">{day}</span>
+                              <Badge className={cn("text-xs px-2 py-0.5", getStatusColor(status))}>
+                                {status}
+                              </Badge>
+                            </div>
+                            <div className="space-y-2">
+                              {punchPairs.length > 0 ? punchPairs.map((pair, index) => (
+                                <div key={index} className="bg-gray-50 rounded p-2">
+                                  <div className="text-xs text-green-600 font-medium">
+                                    IN: {pair.checkIn}
+                                  </div>
+                                  {pair.checkOut && (
+                                    <div className="text-xs text-red-600 font-medium">
+                                      OUT: {pair.checkOut}
+                                    </div>
+                                  )}
+                                </div>
+                              )) : (
+                                <div className="text-xs text-gray-400 text-center py-2">
+                                  No punches
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

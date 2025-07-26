@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -66,6 +67,11 @@ const Sidebar = () => {
             <span className="font-bold text-xl text-gray-900">HRMSPro</span>
           </div>
         )}
+        {isCollapsed && (
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto">
+            <Shield className="w-5 h-5 text-white" />
+          </div>
+        )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1 hover:bg-gray-100 rounded-md transition-colors"
@@ -85,14 +91,16 @@ const Sidebar = () => {
             key={item.path}
             to={item.path}
             className={cn(
-              "flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group",
+              "flex items-center px-3 py-3 rounded-lg transition-all duration-200 group",
+              isCollapsed ? "justify-center" : "space-x-3",
               isActive(item.path)
                 ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
           >
             <item.icon className={cn(
-              "w-5 h-5 transition-colors",
+              "transition-colors flex-shrink-0",
+              isCollapsed ? "w-6 h-6" : "w-5 h-5",
               isActive(item.path) ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"
             )} />
             {!isCollapsed && (

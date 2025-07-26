@@ -89,7 +89,6 @@ const InteractiveIndiaMap: React.FC<InteractiveIndiaMapProps> = ({
   onBranchSelect,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const mapRef = useRef<L.Map | null>(null);
 
   const filteredBranches = branches.filter(branch =>
     branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -100,9 +99,6 @@ const InteractiveIndiaMap: React.FC<InteractiveIndiaMapProps> = ({
   const handleSearchSelect = (branch: Branch) => {
     onBranchSelect(branch);
     setSearchTerm('');
-    if (mapRef.current) {
-      mapRef.current.setView([branch.coordinates.lat, branch.coordinates.lng], 10);
-    }
   };
 
   useEffect(() => {
@@ -171,10 +167,9 @@ const InteractiveIndiaMap: React.FC<InteractiveIndiaMapProps> = ({
       <CardContent className="p-0">
         <div className="relative h-96 rounded-lg overflow-hidden">
           <MapContainer
-            center={[20.5937, 78.9629]} // Center of India
+            center={[20.5937, 78.9629]}
             zoom={5}
             style={{ height: '100%', width: '100%' }}
-            ref={mapRef}
             className="z-0"
           >
             <TileLayer

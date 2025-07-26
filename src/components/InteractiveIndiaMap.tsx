@@ -58,7 +58,7 @@ const createBranchIcon = (employeeCount: number) => {
   });
 };
 
-// Map control component
+// Map control component that properly uses useMap hook
 const MapControls = () => {
   const map = useMap();
 

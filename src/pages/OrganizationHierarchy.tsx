@@ -34,11 +34,13 @@ import {
   RotateCcw,
   Maximize2,
   Minimize2,
-  MapPin
+  MapPin,
+  Clock
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Employee } from '../types';
 import BranchMap from '../components/BranchMap';
+import ShiftManagement from '../components/ShiftManagement';
 
 // Employee Node Component
 const EmployeeNode = ({ data }: { data: any }) => {
@@ -362,7 +364,7 @@ const OrganizationHierarchy = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Organization Management</h1>
-          <p className="text-gray-500 mt-1">Manage your organization structure and branch network</p>
+          <p className="text-gray-500 mt-1">Manage your organization structure, branch network, and shift timings</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleResetLayout}>
@@ -379,9 +381,9 @@ const OrganizationHierarchy = () => {
         </div>
       </div>
 
-      {/* Tabs for Hierarchy and Branches */}
+      {/* Tabs for Hierarchy, Branches, and Shifts */}
       <Tabs defaultValue="hierarchy" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="hierarchy" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Organization Hierarchy
@@ -389,6 +391,10 @@ const OrganizationHierarchy = () => {
           <TabsTrigger value="branches" className="flex items-center gap-2">
             <MapPin className="w-4 h-4" />
             Branch Network
+          </TabsTrigger>
+          <TabsTrigger value="shifts" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Shift Management
           </TabsTrigger>
         </TabsList>
 
@@ -460,6 +466,10 @@ const OrganizationHierarchy = () => {
 
         <TabsContent value="branches">
           <BranchMap />
+        </TabsContent>
+
+        <TabsContent value="shifts">
+          <ShiftManagement />
         </TabsContent>
       </Tabs>
 

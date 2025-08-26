@@ -4,28 +4,44 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../hooks/use-toast';
 import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     try {
       await login(email, password);
+      toast({
+        title: "Success",
+        description: "Login successful! Welcome to HRMSPro.",
+      });
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      console.error('Login error:', err);
+      
+      // Extract the exact error message from the API response
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -84,14 +100,6 @@ const LoginForm = () => {
                 </Button>
               </div>
             </div>
-            
-            {error && (
-              <Alert className="border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700">
-                  {error}
-                </AlertDescription>
-              </Alert>
-            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (

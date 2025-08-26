@@ -74,12 +74,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       });
 
-      if (!loginResponse.ok) {
-        throw new Error('Login failed');
-      }
-
       const loginData = await loginResponse.json();
       console.log('Login response:', loginData);
+
+      if (!loginResponse.ok) {
+        // Extract error message from API response
+        const errorMessage = loginData.message || loginData.exc || `Login failed with status ${loginResponse.status}`;
+        throw new Error(errorMessage);
+      }
+
+      // Check if login was successful based on response structure
+      if (loginData.message && loginData.message.indexOf('Logged In') === -1 && !loginData.message.user_id) {
+        throw new Error(loginData.message || 'Invalid credentials');
+      }
 
       // Extract cookies from response headers
       const setCookieHeaders = loginResponse.headers.get('set-cookie');
@@ -88,7 +95,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Call n8n webhook
       try {
-        await fetch('https://n8n.gopocket.in/webhook/hrms', {
+        const webhookResponse = await fetch('https://n8n.gopocket.in/webhook/hrms', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,7 +105,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             pwd: password
           })
         });
-        console.log('n8n webhook called successfully');
+        
+        if (webhookResponse.ok) {
+          console.log('n8n webhook called successfully');
+        } else {
+          console.warn('n8n webhook failed with status:', webhookResponse.status);
+        }
       } catch (webhookError) {
         console.error('n8n webhook error:', webhookError);
         // Don't throw here as login was successful
@@ -145,7 +157,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      
+      // Re-throw the error with better messaging
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
     } finally {
       setIsLoading(false);
     }

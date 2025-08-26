@@ -9,8 +9,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('admin@acme.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -104,14 +104,6 @@ const LoginForm = () => {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Demo credentials:</p>
-            <p className="font-mono text-xs bg-gray-50 p-2 rounded mt-2">
-              Email: admin@acme.com<br />
-              Password: password
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

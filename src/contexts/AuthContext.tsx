@@ -79,13 +79,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!loginResponse.ok) {
         // Extract error message from API response
-        const errorMessage = loginData.message || loginData.exc || `Login failed with status ${loginResponse.status}`;
+        const errorMessage = loginData.message || loginData.exc || loginData.error || `Authentication failed with status ${loginResponse.status}`;
         throw new Error(errorMessage);
       }
 
       // Check if login was successful based on response structure
-      if (loginData.message && loginData.message.indexOf('Logged In') === -1 && !loginData.message.user_id) {
-        throw new Error(loginData.message || 'Invalid credentials');
+      if (loginData.message) {
+        // If there's a message, check if it indicates failure
+        const message = loginData.message.toLowerCase();
+        if (message.includes('invalid') || message.includes('incorrect') || message.includes('failed')) {
+          throw new Error(loginData.message);
+        }
+        // Also check if it's not a successful login message
+        if (message.indexOf('logged in') === -1 && !loginData.message.user_id && !loginData.full_name) {
+          throw new Error(loginData.message || 'Invalid email or password');
+        }
+      }
+
+      // If we have an exc field, it usually means an error occurred
+      if (loginData.exc) {
+        throw new Error('Invalid email or password');
       }
 
       // Extract cookies from response headers
@@ -161,6 +174,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Re-throw the error with better messaging
       if (error instanceof Error) {
         throw error;
+      } else if (typeof error === 'string') {
+        throw new Error(error);
       } else {
         throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
       }

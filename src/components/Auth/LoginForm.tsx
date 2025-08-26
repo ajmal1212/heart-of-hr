@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
 import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
+import LoadingScreen from '../LoadingScreen';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -27,14 +28,16 @@ const LoginForm = () => {
         title: "Success",
         description: "Login successful! Welcome to HRMSPro.",
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err);
       
       // Extract the exact error message from the API response
       let errorMessage = 'Login failed. Please try again.';
       
-      if (err instanceof Error) {
+      if (err?.message) {
         errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
       }
       
       toast({
@@ -46,6 +49,11 @@ const LoginForm = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading screen during login
+  if (isLoading) {
+    return <LoadingScreen message="Authenticating your credentials..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">

@@ -6,7 +6,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/use-toast';
-import { Loader2, Shield, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import LoadingScreen from '../LoadingScreen';
 
 const LoginForm = () => {
@@ -31,7 +31,6 @@ const LoginForm = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       
-      // Extract the exact error message from the API response
       let errorMessage = 'Login failed. Please try again.';
       
       if (err?.message) {
@@ -50,7 +49,6 @@ const LoginForm = () => {
     }
   };
 
-  // Show loading screen during login
   if (isLoading) {
     return <LoadingScreen message="Authenticating your credentials..." />;
   }
@@ -59,10 +57,14 @@ const LoginForm = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="mx-auto w-20 h-16 flex items-center justify-center mb-4">
+            <img 
+              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+              alt="GoPocket Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to HRMSPro</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to GoPocket HRMS</CardTitle>
           <CardDescription>
             Sign in to your account to continue
           </CardDescription>

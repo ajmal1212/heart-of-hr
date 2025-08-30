@@ -8,7 +8,7 @@ import UpcomingEvents from '../components/Dashboard/UpcomingEvents';
 import { Users, Calendar, Clock, DollarSign, TrendingUp, UserCheck } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user, company } = useAuth();
+  const { user, employee, company } = useAuth();
 
   // Mock data - in a real app, this would come from API
   const stats = [
@@ -63,24 +63,59 @@ const Dashboard = () => {
     return 'Good evening';
   };
 
+  const displayName = employee ? `${employee.firstName} ${employee.lastName}`.trim() : user?.firstName;
+
   return (
     <div className="p-6 space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">
-          {getGreeting()}, {user?.firstName}! 👋
-        </h1>
-        <p className="text-blue-100 mb-4">
-          Welcome back to {company?.name}. Here's what's happening today.
-        </p>
-        <div className="flex items-center space-x-4 text-blue-100">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span className="text-sm">All systems operational</span>
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold mb-2">
+              {getGreeting()}, {displayName}! 👋
+            </h1>
+            <p className="text-purple-100 mb-4">
+              Welcome back to {company?.name}. Here's what's happening today.
+            </p>
+            <div className="flex items-center space-x-4 text-purple-100">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-sm">All systems operational</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                <span className="text-sm">3 pending approvals</span>
+              </div>
+            </div>
+            {employee && (
+              <div className="mt-4 p-3 bg-white/10 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-purple-200">Department:</span>
+                    <p className="text-white font-medium">{employee.department}</p>
+                  </div>
+                  <div>
+                    <span className="text-purple-200">Designation:</span>
+                    <p className="text-white font-medium">{employee.designation}</p>
+                  </div>
+                  <div>
+                    <span className="text-purple-200">Employee ID:</span>
+                    <p className="text-white font-medium">{employee.employeeId}</p>
+                  </div>
+                  <div>
+                    <span className="text-purple-200">Joining Date:</span>
+                    <p className="text-white font-medium">{new Date(employee.joiningDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-            <span className="text-sm">3 pending approvals</span>
+          <div className="ml-6">
+            <img 
+              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+              alt="GoPocket Logo" 
+              className="w-16 h-12 object-contain opacity-80"
+            />
           </div>
         </div>
       </div>

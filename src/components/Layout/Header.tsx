@@ -15,7 +15,7 @@ import {
 } from '../ui/dropdown-menu';
 
 const Header = () => {
-  const { user, company, logout } = useAuth();
+  const { user, employee, company, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -26,6 +26,11 @@ const Header = () => {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
+
+  const displayName = employee ? `${employee.firstName} ${employee.lastName}`.trim() : `${user?.firstName} ${user?.lastName}`;
+  const displayEmail = employee?.email || user?.email;
+  const displayAvatar = employee?.avatar || user?.avatar;
+  const displayDesignation = employee?.designation || user?.role;
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
@@ -70,7 +75,7 @@ const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar>
-                  <AvatarImage src={user?.avatar} alt={user?.firstName} />
+                  <AvatarImage src={displayAvatar} alt={displayName} />
                   <AvatarFallback className="bg-blue-500 text-white">
                     {user && getInitials(user.firstName, user.lastName)}
                   </AvatarFallback>
@@ -81,14 +86,19 @@ const Header = () => {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium">
-                    {user?.firstName} {user?.lastName}
+                    {displayName}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {user?.email}
+                    {displayEmail}
                   </p>
                   <p className="text-xs text-blue-600 font-medium capitalize">
-                    {user?.role}
+                    {displayDesignation}
                   </p>
+                  {employee?.employeeId && (
+                    <p className="text-xs text-gray-400">
+                      ID: {employee.employeeId}
+                    </p>
+                  )}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -109,9 +119,16 @@ const Header = () => {
           </DropdownMenu>
 
           {/* Company info */}
-          <div className="hidden md:flex flex-col items-end text-sm">
-            <span className="font-medium text-gray-900">{company?.name}</span>
-            <span className="text-gray-500 text-xs">{company?.subscriptionPlan}</span>
+          <div className="hidden md:flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+              alt="GoPocket Logo" 
+              className="w-8 h-6 object-contain"
+            />
+            <div className="flex flex-col items-end text-sm">
+              <span className="font-medium text-gray-900">{company?.name}</span>
+              <span className="text-gray-500 text-xs">{company?.subscriptionPlan}</span>
+            </div>
           </div>
         </div>
       </div>

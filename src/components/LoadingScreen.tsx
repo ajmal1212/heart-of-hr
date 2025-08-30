@@ -57,14 +57,14 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Signing you in
       <div className="text-center space-y-8 max-w-md">
         {/* Animated Logo */}
         <div className="relative">
-          <div className="mx-auto w-24 h-20 bg-white rounded-xl shadow-lg flex items-center justify-center animate-pulse">
+          <div className="mx-auto w-24 h-20 bg-white rounded-xl shadow-lg flex items-center justify-center">
             <img 
               src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
               alt="GoPocket Logo" 
               className="w-16 h-12 object-contain animate-bounce"
             />
           </div>
-          <div className="absolute -inset-4 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full animate-ping"></div>
+          {/*<div className="absolute -inset-4 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full animate-ping"></div>*/}
         </div>
 
         {/* Loading Message */}

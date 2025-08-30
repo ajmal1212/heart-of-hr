@@ -57,7 +57,7 @@ const LoginForm = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
-          <div className="mx-auto w-20 h-16 flex items-center justify-center mb-4">
+          <div className="mx-auto w-24 h-20 flex items-center justify-center mb-4">
             <img 
               src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
               alt="GoPocket Logo" 

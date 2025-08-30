@@ -48,7 +48,7 @@ const Header = () => {
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
-          {/* Dark mode toggle */}
+          {/* Dark mode toggle 
           <Button
             variant="ghost"
             size="icon"
@@ -60,7 +60,7 @@ const Header = () => {
             ) : (
               <Moon className="w-5 h-5" />
             )}
-          </Button>
+          </Button>*/}
 
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
@@ -117,15 +117,6 @@ const Header = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Company logo only */}
-          <div className="hidden md:flex items-center">
-            <img 
-              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
-              alt="GoPocket Logo" 
-              className="w-8 h-6 object-contain"
-            />
-          </div>
         </div>
       </div>
     </header>

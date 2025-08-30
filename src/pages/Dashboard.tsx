@@ -110,13 +110,6 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-          <div className="ml-6">
-            <img 
-              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
-              alt="GoPocket Logo" 
-              className="w-16 h-12 object-contain opacity-80"
-            />
-          </div>
         </div>
       </div>
 

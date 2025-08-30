@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Company, Employee } from '../types';
 
@@ -65,24 +64,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
-      // Call Frappe API for login
-      const loginResponse = await fetch('https://hrms-db.gopocket.in/api/method/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          usr: email,
-          pwd: password
+      // Parallel API calls to reduce login time
+      const [loginResponse, webhookResponse] = await Promise.allSettled([
+        fetch('https://hrms-db.gopocket.in/api/method/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            usr: email,
+            pwd: password
+          })
+        }),
+        fetch('https://n8n.gopocket.in/webhook/hrms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            usr: email,
+            pwd: password
+          })
         })
-      });
+      ]);
 
-      const loginData = await loginResponse.json();
+      // Handle login response
+      if (loginResponse.status === 'rejected') {
+        throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+      }
+
+      const loginResult = loginResponse.value;
+      const loginData = await loginResult.json();
       console.log('Login response:', loginData);
 
-      if (!loginResponse.ok) {
-        const errorMessage = loginData.message || loginData.exc || loginData.error || `Authentication failed with status ${loginResponse.status}`;
+      if (!loginResult.ok) {
+        const errorMessage = loginData.message || loginData.exc || loginData.error || `Authentication failed with status ${loginResult.status}`;
         throw new Error(errorMessage);
       }
 
@@ -100,81 +117,66 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('Invalid email or password');
       }
 
-      const setCookieHeaders = loginResponse.headers.get('set-cookie');
+      const setCookieHeaders = loginResult.headers.get('set-cookie');
       const cookieString = setCookieHeaders || '';
       setCookies(cookieString);
 
-      // Call n8n webhook and get employee data
+      // Handle webhook response
       let employeeData = null;
-      try {
-        const webhookResponse = await fetch('https://n8n.gopocket.in/webhook/hrms', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            usr: email,
-            pwd: password
-          })
-        });
+      if (webhookResponse.status === 'fulfilled' && webhookResponse.value.ok) {
+        const webhookData = await webhookResponse.value.json();
+        console.log('n8n webhook response:', webhookData);
         
-        if (webhookResponse.ok) {
-          const webhookData = await webhookResponse.json();
-          console.log('n8n webhook response:', webhookData);
-          
-          if (Array.isArray(webhookData) && webhookData.length > 0) {
-            const empData = webhookData[0];
-            employeeData = {
-              id: empData.name,
-              employeeId: empData.employee,
-              userId: empData.name,
-              companyId: empData.company?.toLowerCase().replace(/\s+/g, '-') || 'gopocket',
-              firstName: empData.first_name,
-              lastName: empData.last_name || '',
-              email: empData.company_email || empData.personal_email,
-              phone: empData.cell_number,
-              avatar: empData.image ? `https://hrms-db.gopocket.in${empData.image}` : undefined,
-              department: empData.department,
-              designation: empData.designation,
-              joiningDate: empData.date_of_joining,
-              salary: empData.ctc || 0,
-              status: empData.status?.toLowerCase() === 'active' ? 'confirmed' : 'probation',
-              address: '',
-              emergencyContact: {
-                name: empData.person_to_be_contacted || '',
-                phone: empData.emergency_phone_number || '',
-                relationship: empData.relation || ''
-              },
-              documents: [],
-              createdAt: empData.creation,
-              updatedAt: empData.modified
-            } as Employee;
-          }
-        } else {
-          console.warn('n8n webhook failed with status:', webhookResponse.status);
+        if (Array.isArray(webhookData) && webhookData.length > 0) {
+          const empData = webhookData[0];
+          employeeData = {
+            id: empData.name,
+            employeeId: empData.employee,
+            userId: empData.name,
+            companyId: empData.company?.toLowerCase().replace(/\s+/g, '-') || 'gopocket',
+            firstName: empData.first_name,
+            lastName: empData.last_name || '',
+            email: empData.company_email || empData.personal_email,
+            phone: empData.cell_number,
+            avatar: empData.image ? `https://hrms-db.gopocket.in${empData.image}` : undefined,
+            department: empData.department,
+            designation: empData.designation,
+            joiningDate: empData.date_of_joining,
+            salary: empData.ctc || 0,
+            status: empData.status?.toLowerCase() === 'active' ? 'confirmed' : 'probation',
+            address: '',
+            emergencyContact: {
+              name: empData.person_to_be_contacted || '',
+              phone: empData.emergency_phone_number || '',
+              relationship: empData.relation || ''
+            },
+            documents: [],
+            createdAt: empData.creation,
+            updatedAt: empData.modified
+          } as Employee;
         }
-      } catch (webhookError) {
-        console.error('n8n webhook error:', webhookError);
+      } else {
+        console.warn('n8n webhook failed or was rejected');
       }
 
-      // Create user data
+      // Create user data with fallback values
       const userData: User = {
         id: loginData.message?.user_id || employeeData?.id || '1',
         email: email,
-        firstName: employeeData?.firstName || loginData.message?.first_name || 'User',
-        lastName: employeeData?.lastName || loginData.message?.last_name || 'Name',
+        firstName: employeeData?.firstName || loginData.message?.first_name || loginData.full_name?.split(' ')[0] || 'User',
+        lastName: employeeData?.lastName || loginData.message?.last_name || loginData.full_name?.split(' ').slice(1).join(' ') || 'Name',
         role: 'employee',
         companyId: employeeData?.companyId || 'gopocket',
-        avatar: employeeData?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
+        avatar: employeeData?.avatar || '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
         isActive: true,
-        createdAt: employeeData?.createdAt || '2024-01-01T00:00:00Z',
-        updatedAt: employeeData?.updatedAt || '2024-01-01T00:00:00Z'
+        createdAt: employeeData?.createdAt || new Date().toISOString(),
+        updatedAt: employeeData?.updatedAt || new Date().toISOString()
       };
 
       // Create company data
       const companyData: Company = {
         id: employeeData?.companyId || 'gopocket',
-        name: 'GoPocket Corporation',
+        name: employeeData?.companyId === 'gopocket' ? 'GoPocket Corporation' : 'Company Name',
         subdomain: 'gopocket',
         logo: '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
         address: '123 Business St, Tech City, TC 12345',
@@ -189,6 +191,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         updatedAt: '2024-01-01T00:00:00Z'
       };
 
+      // Set state and save to localStorage
       setUser(userData);
       setEmployee(employeeData);
       setCompany(companyData);

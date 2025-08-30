@@ -5,31 +5,24 @@ import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Calendar } from '../components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { 
-  Plus, 
   Calendar as CalendarIcon, 
   Clock, 
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  User,
   Filter,
   Search,
-  FileText,
   Timer,
-  Users,
   MapPin
 } from 'lucide-react';
+import LeaveApplicationModal from '../components/Leave/LeaveApplicationModal';
 
 const Leaves = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [activeTab, setActiveTab] = useState('all');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applicationType, setApplicationType] = useState('');
+  const [applicationLabel, setApplicationLabel] = useState('');
 
   const leaveStats = [
     { label: 'Total Leaves', value: 25, icon: CalendarIcon, color: 'text-blue-600' },
@@ -100,121 +93,10 @@ const Leaves = () => {
   };
 
   const handleApplicationClick = (type: string) => {
+    const option = applicationOptions.find(opt => opt.id === type);
     setApplicationType(type);
+    setApplicationLabel(option?.label || '');
     setShowApplyModal(true);
-  };
-
-  const renderApplicationForm = () => {
-    switch (applicationType) {
-      case 'leave':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="leaveType">Leave Type</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select leave type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="annual">Annual Leave</SelectItem>
-                  <SelectItem value="sick">Sick Leave</SelectItem>
-                  <SelectItem value="personal">Personal Leave</SelectItem>
-                  <SelectItem value="maternity">Maternity Leave</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input type="date" id="startDate" />
-              </div>
-              <div>
-                <Label htmlFor="endDate">End Date</Label>
-                <Input type="date" id="endDate" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="reason">Reason</Label>
-              <Textarea id="reason" placeholder="Please provide reason for leave" />
-            </div>
-          </div>
-        );
-      case 'permission':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="permissionDate">Date</Label>
-              <Input type="date" id="permissionDate" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fromTime">From Time</Label>
-                <Input type="time" id="fromTime" />
-              </div>
-              <div>
-                <Label htmlFor="toTime">To Time</Label>
-                <Input type="time" id="toTime" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="permissionReason">Reason</Label>
-              <Textarea id="permissionReason" placeholder="Please provide reason for permission" />
-            </div>
-          </div>
-        );
-      case 'onduty':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="ondutyDate">Date</Label>
-              <Input type="date" id="ondutyDate" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="ondutyFromTime">From Time</Label>
-                <Input type="time" id="ondutyFromTime" />
-              </div>
-              <div>
-                <Label htmlFor="ondutyToTime">To Time</Label>
-                <Input type="time" id="ondutyToTime" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" placeholder="Enter location" />
-            </div>
-            <div>
-              <Label htmlFor="ondutyReason">Purpose</Label>
-              <Textarea id="ondutyReason" placeholder="Please provide purpose of on duty" />
-            </div>
-          </div>
-        );
-      case 'overtime':
-        return (
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="overtimeDate">Date</Label>
-              <Input type="date" id="overtimeDate" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="overtimeFromTime">From Time</Label>
-                <Input type="time" id="overtimeFromTime" />
-              </div>
-              <div>
-                <Label htmlFor="overtimeToTime">To Time</Label>
-                <Input type="time" id="overtimeToTime" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="overtimeReason">Reason</Label>
-              <Textarea id="overtimeReason" placeholder="Please provide reason for overtime" />
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
   };
 
   return (
@@ -429,31 +311,12 @@ const Leaves = () => {
       </div>
 
       {/* Application Modal */}
-      {showApplyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">
-                {applicationOptions.find(opt => opt.id === applicationType)?.label}
-              </h2>
-              <Button variant="ghost" size="sm" onClick={() => setShowApplyModal(false)}>
-                <XCircle className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            {renderApplicationForm()}
-            
-            <div className="flex gap-2 mt-6">
-              <Button className="flex-1" onClick={() => setShowApplyModal(false)}>
-                Submit Application
-              </Button>
-              <Button variant="outline" onClick={() => setShowApplyModal(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LeaveApplicationModal
+        applicationType={applicationType}
+        applicationLabel={applicationLabel}
+        isOpen={showApplyModal}
+        onClose={() => setShowApplyModal(false)}
+      />
     </div>
   );
 };

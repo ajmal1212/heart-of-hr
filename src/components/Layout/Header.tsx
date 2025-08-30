@@ -29,7 +29,14 @@ const Header = () => {
 
   const displayName = employee ? `${employee.firstName} ${employee.lastName}`.trim() : `${user?.firstName} ${user?.lastName}`;
   const displayEmail = employee?.email || user?.email;
-  const displayAvatar = employee?.avatar || user?.avatar;
+  
+  // Fix the avatar URL construction
+  const displayAvatar = employee?.avatar 
+    ? (employee.avatar.startsWith('http') 
+        ? employee.avatar 
+        : `https://hrms-db.gopocket.in${employee.avatar}`)
+    : user?.avatar;
+    
   const displayDesignation = employee?.designation || user?.role;
 
   return (

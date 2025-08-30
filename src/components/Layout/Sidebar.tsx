@@ -12,7 +12,6 @@ import {
   Settings, 
   ChevronLeft, 
   ChevronRight,
-  Shield,
   FileText,
   Bell,
   Award,
@@ -60,17 +59,21 @@ const Sidebar = () => {
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         {!isCollapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-xl text-gray-900">HRMSPro</span>
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+              alt="GoPocket Logo" 
+              className="w-10 h-8 object-contain"
+            />
+            <span className="font-bold text-xl text-gray-900">GoPocket HRMS</span>
           </div>
         )}
         {isCollapsed && (
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
+          <img 
+            src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+            alt="GoPocket Logo" 
+            className="w-8 h-6 object-contain mx-auto"
+          />
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -114,7 +117,7 @@ const Sidebar = () => {
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200">
           <div className="text-xs text-gray-500 text-center">
-            © 2024 HRMSPro
+            © 2024 GoPocket HRMS
           </div>
         </div>
       )}

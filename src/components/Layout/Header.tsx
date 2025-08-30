@@ -15,7 +15,7 @@ import {
 } from '../ui/dropdown-menu';
 
 const Header = () => {
-  const { user, employee, company, logout } = useAuth();
+  const { user, employee, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -29,14 +29,7 @@ const Header = () => {
 
   const displayName = employee ? `${employee.firstName} ${employee.lastName}`.trim() : `${user?.firstName} ${user?.lastName}`;
   const displayEmail = employee?.email || user?.email;
-  
-  // Fix the avatar URL construction
-  const displayAvatar = employee?.avatar 
-    ? (employee.avatar.startsWith('http') 
-        ? employee.avatar 
-        : `https://hrms-db.gopocket.in${employee.avatar}`)
-    : user?.avatar;
-    
+  const displayAvatar = employee?.avatar || user?.avatar;
   const displayDesignation = employee?.designation || user?.role;
 
   return (
@@ -125,17 +118,13 @@ const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Company info */}
-          <div className="hidden md:flex items-center space-x-3">
+          {/* Company logo only */}
+          <div className="hidden md:flex items-center">
             <img 
               src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
               alt="GoPocket Logo" 
               className="w-8 h-6 object-contain"
             />
-            <div className="flex flex-col items-end text-sm">
-              <span className="font-medium text-gray-900">{company?.name}</span>
-              <span className="text-gray-500 text-xs">{company?.subscriptionPlan}</span>
-            </div>
           </div>
         </div>
       </div>

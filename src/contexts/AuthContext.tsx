@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Company, Employee } from '../types';
 
@@ -129,6 +130,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (Array.isArray(webhookData) && webhookData.length > 0) {
           const empData = webhookData[0];
+          // Fix avatar URL construction here
+          const avatarUrl = empData.image 
+            ? (empData.image.startsWith('http') 
+                ? empData.image 
+                : `https://hrms-db.gopocket.in${empData.image}`)
+            : undefined;
+          
           employeeData = {
             id: empData.name,
             employeeId: empData.employee,
@@ -138,7 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             lastName: empData.last_name || '',
             email: empData.company_email || empData.personal_email,
             phone: empData.cell_number,
-            avatar: empData.image ? `https://hrms-db.gopocket.in${empData.image}` : undefined,
+            avatar: avatarUrl,
             department: empData.department,
             designation: empData.designation,
             joiningDate: empData.date_of_joining,
@@ -176,7 +184,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Create company data
       const companyData: Company = {
         id: employeeData?.companyId || 'gopocket',
-        name: employeeData?.companyId === 'gopocket' ? 'GoPocket Corporation' : 'Company Name',
+        name: employeeData?.companyId === 'gopocket' ? 'GoPocket' : 'Company Name',
         subdomain: 'gopocket',
         logo: '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
         address: '123 Business St, Tech City, TC 12345',

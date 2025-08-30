@@ -58,23 +58,14 @@ const Sidebar = () => {
     )}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        {!isCollapsed && (
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
-              alt="GoPocket Logo" 
-              className="w-10 h-8 object-contain"
-            />
-            <span className="font-bold text-xl text-gray-900">GoPocket HRMS</span>
-          </div>
-        )}
-        {isCollapsed && (
-          <img 
-            src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
-            alt="GoPocket Logo" 
-            className="w-8 h-6 object-contain mx-auto"
-          />
-        )}
+        <img 
+          src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+          alt="GoPocket Logo" 
+          className={cn(
+            "object-contain transition-all duration-300",
+            isCollapsed ? "w-8 h-6 mx-auto" : "w-10 h-8"
+          )}
+        />
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1 hover:bg-gray-100 rounded-md transition-colors"

@@ -40,9 +40,14 @@ const Sidebar = () => {
     { icon: Settings, label: 'Settings', path: '/settings', roles: ['admin', 'hr'] },
   ];
 
-  const filteredMenuItems = menuItems.filter(item => 
-    user?.role && item.roles.includes(user.role)
-  );
+  // Check if user is admin based on email or role
+  const isAdmin = user?.email === 'hr@gopocket.in' || user?.role === 'admin' || user?.role === 'hr';
+  
+  const filteredMenuItems = isAdmin 
+    ? menuItems // Show all items for admin
+    : menuItems.filter(item => 
+        user?.role && item.roles.includes(user.role)
+      );
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -58,17 +63,25 @@ const Sidebar = () => {
     )}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <img 
-          src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
-          alt="GoPocket Logo" 
-          className={cn(
-            "object-contain transition-all duration-300",
-            isCollapsed ? "w-8 h-6 mx-auto" : "w-10 h-8"
-          )}
-        />
+        <div className={cn(
+          "flex items-center transition-all duration-300",
+          isCollapsed ? "justify-center w-full" : "w-full"
+        )}>
+          <img 
+            src="/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png" 
+            alt="GoPocket Logo" 
+            className={cn(
+              "object-contain transition-all duration-300",
+              isCollapsed ? "w-8 h-6" : "w-full max-w-[120px] h-8"
+            )}
+          />
+        </div>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+          className={cn(
+            "p-1 hover:bg-gray-100 rounded-md transition-colors flex-shrink-0",
+            isCollapsed ? "ml-0" : "ml-2"
+          )}
         >
           {isCollapsed ? (
             <ChevronRight className="w-5 h-5 text-gray-500" />

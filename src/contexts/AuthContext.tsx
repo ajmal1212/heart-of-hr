@@ -167,13 +167,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('n8n webhook failed or was rejected');
       }
 
+      // Determine user role based on email
+      let userRole: User['role'] = 'employee';
+      if (email === 'hr@gopocket.in') {
+        userRole = 'admin';
+      } else if (employeeData?.designation?.toLowerCase().includes('manager')) {
+        userRole = 'manager';
+      }
+
       // Create user data with fallback values
       const userData: User = {
         id: loginData.message?.user_id || employeeData?.id || '1',
         email: email,
         firstName: employeeData?.firstName || loginData.message?.first_name || loginData.full_name?.split(' ')[0] || 'User',
         lastName: employeeData?.lastName || loginData.message?.last_name || loginData.full_name?.split(' ').slice(1).join(' ') || 'Name',
-        role: 'employee',
+        role: userRole,
         companyId: employeeData?.companyId || 'gopocket',
         avatar: employeeData?.avatar || '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
         isActive: true,

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Company, Employee } from '../types';
 
@@ -8,7 +7,7 @@ interface AuthContextType {
   company: Company | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (employeeId: string, password: string) => Promise<void>;
   logout: () => void;
   switchRole: (role: string) => void;
   cookies: string;
@@ -62,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (employeeId: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
       // Parallel API calls to reduce login time
@@ -74,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           },
           credentials: 'include',
           body: JSON.stringify({
-            usr: email,
+            usr: employeeId, // Changed from email to employeeId
             pwd: password
           })
         }),
@@ -84,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            usr: email,
+            usr: employeeId, // Changed from email to employeeId
             pwd: password
           })
         })
@@ -110,12 +109,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           throw new Error(loginData.message);
         }
         if (message.indexOf('logged in') === -1 && !loginData.message.user_id && !loginData.full_name) {
-          throw new Error(loginData.message || 'Invalid email or password');
+          throw new Error(loginData.message || 'Invalid employee ID or password');
         }
       }
 
       if (loginData.exc) {
-        throw new Error('Invalid email or password');
+        throw new Error('Invalid employee ID or password');
       }
 
       const setCookieHeaders = loginResult.headers.get('set-cookie');
@@ -167,9 +166,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.warn('n8n webhook failed or was rejected');
       }
 
-      // Determine user role based on email
+      // Determine user role based on employee ID or designation
       let userRole: User['role'] = 'employee';
-      if (email === 'hr@gopocket.in') {
+      if (employeeId === 'HR001' || employeeId === 'hr001') { // Example HR employee ID
         userRole = 'admin';
       } else if (employeeData?.designation?.toLowerCase().includes('manager')) {
         userRole = 'manager';
@@ -178,7 +177,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Create user data with fallback values
       const userData: User = {
         id: loginData.message?.user_id || employeeData?.id || '1',
-        email: email,
+        employeeId: employeeId, // Add employeeId to user object
+        email: employeeData?.email || '', // Get email from employee data
         firstName: employeeData?.firstName || loginData.message?.first_name || loginData.full_name?.split(' ')[0] || 'User',
         lastName: employeeData?.lastName || loginData.message?.last_name || loginData.full_name?.split(' ').slice(1).join(' ') || 'Name',
         role: userRole,

@@ -11,6 +11,7 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  employeeId: string;
 }
 
 export interface Company {

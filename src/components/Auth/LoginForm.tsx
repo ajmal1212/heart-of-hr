@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -10,7 +9,7 @@ import { Loader2, Eye, EyeOff } from 'lucide-react';
 import LoadingScreen from '../LoadingScreen';
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +22,7 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(employeeId, password);
       toast({
         title: "Success",
         description: "Login successful! Welcome to HRMSPro.",
@@ -72,13 +71,13 @@ const LoginForm = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="employeeId">Employee ID</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="employeeId"
+                type="text"
+                placeholder="Enter your employee ID"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
                 disabled={isLoading}
                 required
               />

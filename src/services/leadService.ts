@@ -72,10 +72,13 @@ export const fetchLeads = async (source: string, employeeId: string, cookies: st
       throw new Error(`Failed to fetch leads: ${response.status}`);
     }
 
-    const data: LeadData[] = await response.json();
+    const data = await response.json();
+    
+    // Handle both single object and array responses
+    const dataArray: LeadData[] = Array.isArray(data) ? data : [data];
     
     // Filter leads to show only those for the current employee
-    const filteredLeads = data.filter(lead => lead.referral_id === employeeId);
+    const filteredLeads = dataArray.filter(lead => lead.referral_id === employeeId);
     
     return filteredLeads;
   } catch (error) {

@@ -9,6 +9,7 @@ export interface LeadData {
   insurance_type?: string;
   insurance_partner?: string;
   referral_id: string;
+  lead_status?: string;
   sum_insured_plan?: string;
   email: string;
   full_name: string;
@@ -53,7 +54,21 @@ export interface LeadData {
   doctype: string;
 }
 
+const getCacheKey = (source: string, employeeId: string) => `leads_${source}_${employeeId}`;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export const fetchLeads = async (source: string, employeeId: string, cookies: string): Promise<LeadData[]> => {
+  const cacheKey = getCacheKey(source, employeeId);
+  
+  // Check cache first
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_DURATION) {
+      return data;
+    }
+  }
+
   try {
     const response = await fetch('https://n8n.gopocket.in/webhook/hrms', {
       method: 'POST',
@@ -80,9 +95,22 @@ export const fetchLeads = async (source: string, employeeId: string, cookies: st
     // Filter leads to show only those for the current employee
     const filteredLeads = dataArray.filter(lead => lead.referral_id === employeeId);
     
+    // Cache the results
+    localStorage.setItem(cacheKey, JSON.stringify({
+      data: filteredLeads,
+      timestamp: Date.now()
+    }));
+    
     return filteredLeads;
   } catch (error) {
     console.error('Lead fetch error:', error);
     throw error;
   }
+};
+
+export const clearLeadsCache = (employeeId: string) => {
+  const sources = ['insurance', 'term-life', 'porting', 'contact-us'];
+  sources.forEach(source => {
+    localStorage.removeItem(getCacheKey(source, employeeId));
+  });
 };

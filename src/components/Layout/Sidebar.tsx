@@ -15,7 +15,8 @@ import {
   FileText,
   Bell,
   Award,
-  Network
+  Network,
+  Target
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { cn } from '../../lib/utils';
@@ -37,6 +38,7 @@ const Sidebar = () => {
     { icon: FileText, label: 'Documents', path: '/documents', roles: ['admin', 'hr', 'manager', 'employee'] },
     { icon: BarChart3, label: 'Analytics', path: '/analytics', roles: ['admin', 'hr'] },
     { icon: Bell, label: 'Announcements', path: '/announcements', roles: ['admin', 'hr', 'manager', 'employee'] },
+    { icon: Target, label: 'Lead', path: '/lead', roles: ['admin', 'hr', 'manager', 'employee'] },
     { icon: Settings, label: 'Settings', path: '/settings', roles: ['admin', 'hr'] },
   ];
 

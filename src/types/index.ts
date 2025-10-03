@@ -110,3 +110,17 @@ export interface Designation {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  status: 'open' | 'in-progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  category: 'technical' | 'hr' | 'payroll' | 'leave' | 'other';
+  createdBy: string;
+  assignedTo?: string;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+}

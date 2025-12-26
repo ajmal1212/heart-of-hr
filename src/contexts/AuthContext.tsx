@@ -64,6 +64,80 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (employeeId: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
+      // Test admin login for development
+      if (employeeId === 'admin' && password === 'admin123') {
+        const testUser: User = {
+          id: 'admin-1',
+          employeeId: 'admin',
+          email: 'admin@test.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin',
+          companyId: 'gopocket',
+          avatar: '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        const testEmployee: Employee = {
+          id: 'admin-1',
+          employeeId: 'admin',
+          userId: 'admin-1',
+          companyId: 'gopocket',
+          firstName: 'Admin',
+          lastName: 'User',
+          email: 'admin@test.com',
+          phone: '+1 (555) 123-4567',
+          avatar: '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
+          department: 'IT',
+          designation: 'System Administrator',
+          joiningDate: new Date().toISOString(),
+          salary: 100000,
+          status: 'confirmed',
+          address: '123 Admin St, Tech City',
+          emergencyContact: {
+            name: 'Emergency Contact',
+            phone: '+1 (555) 987-6543',
+            relationship: 'Family'
+          },
+          documents: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        const testCompany: Company = {
+          id: 'gopocket',
+          name: 'GoPocket',
+          subdomain: 'gopocket',
+          logo: '/lovable-uploads/e80701e6-7295-455c-a88c-e3c4a1baad9b.png',
+          address: '123 Business St, Tech City, TC 12345',
+          phone: '+1 (555) 123-4567',
+          email: 'contact@gopocket.in',
+          website: 'https://gopocket.in',
+          timezone: 'Asia/Kolkata',
+          currency: 'INR',
+          subscriptionPlan: 'premium',
+          subscriptionStatus: 'active',
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z'
+        };
+
+        setUser(testUser);
+        setEmployee(testEmployee);
+        setCompany(testCompany);
+        setCookies('test-session-cookie');
+        setIsAuthenticated(true);
+        
+        localStorage.setItem('hrms_user', JSON.stringify(testUser));
+        localStorage.setItem('hrms_employee', JSON.stringify(testEmployee));
+        localStorage.setItem('hrms_company', JSON.stringify(testCompany));
+        localStorage.setItem('hrms_cookies', 'test-session-cookie');
+        
+        setIsLoading(false);
+        return;
+      }
+
       // Parallel API calls to reduce login time
       const [loginResponse, webhookResponse] = await Promise.allSettled([
         fetch('https://hrms-db.gopocket.in/api/method/login', {
